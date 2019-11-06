@@ -1,0 +1,105 @@
+<div class="backdrop" ng-show="isOpened" ng-click="activeToggle()"></div>
+<header>
+  <a ui-sref="index">
+    <div class="header__site-logo"></div>
+  </a>
+  <span ng-switch="userRole">
+    <span class="header__additional-nav" ng-if="!(userRole === 0 || userRole === 1)">
+      <span class="additional-nav__item" ui-sref="signup">Стать разработчиком</span>
+      <span>или</span>
+      <span class="additional-nav__item" ng-click="openLoginDialog($event)">
+      <span class="log-in"></span> Войти
+    </span>
+    </span>
+    <span class="header__additional-nav" ng-if="userRole === 0 || userRole === 1">
+      <span class="additional-nav__item" ui-sref="notifications">Оповещений: {{notificationsAmount || 0}}</span> |
+      <a class="additional-nav__item" ng-href="{{'/developers/' + userId}}">Портфолио</a> |
+      <a class="additional-nav__item" ui-sref="developers.edit">Профиль</a> |
+      <a class="additional-nav__item" ui-sref="adminpanel.index" ng-if="userRole === 1">Администрирование</a>
+      <span ng-if="userRole">|</span>
+      <span class="additional-nav__item" ng-click="signOut()">
+        <span class="log-out"></span> Выйти
+      </span>
+    </span>
+  </span>
+
+  <div class="header__nav-toggle" ng-click="activeToggle()"
+       ng-class="{'header__nav-toggle--active': isOpened}">
+    <div class="nav-toggle__burger"></div>
+  </div>
+  <nav class="header__nav-full">
+    <a class="nav-full__item" ui-sref="order">Заказать</a>
+    <a class="nav-full__item" ui-sref="projects.index">Проекты</a>
+    <a class="nav-full__item" ui-sref="developers.index">Разработчики</a>
+    <a class="nav-full__item" href="//endowment.misis.ru/blog/liga">Блог</a>
+    <a class="nav-full__item" ui-sref="about">О нас</a>
+    <a class="nav-full__item" ui-sref="contact">Связаться</a>
+  </nav>
+</header>
+<nav class="nav-mobile" ng-show="isOpened">
+  <a class="nav-mobile__item" ui-sref="notifications" ng-bind="'Оповещений: '+ notificationsAmount || 0"
+     ng-if="userRole === 0 || userRole === 1"></a>
+  <a class="nav-mobile__item" ng-href="{{'/developers/' + userId}}"
+     ng-if="userRole === 0 || userRole === 1">Портфолио</a>
+  <a class="nav-mobile__item" ui-sref="developers.edit" ng-if="userRole === 0 || userRole === 1">Профиль</a>
+  <a class="nav-mobile__item" ui-sref="adminpanel.index" ng-if="userRole === 1">Администрирование</a>
+  <a class="nav-mobile__item" ng-if="!(userRole === 0 || userRole === 1)" ng-click="openLoginDialog($event)">Войти</a>
+  <a class="nav-mobile__item" ng-if="!(userRole === 0 || userRole === 1)" ui-sref="signup">Стать разработчиком</a>
+  <a class="nav-mobile__item" ng-if="!(userRole === 0 || userRole === 1)" ui-sref="order">Сделать заказ</a>
+  <a class="nav-mobile__item" ui-sref="projects.index">Наши проекты</a>
+  <a class="nav-mobile__item" ui-sref="developers.index">Разработчики</a>
+  <a class="nav-mobile__item" href="//endowment.misis.ru/blog/liga">Блог</a>
+  <a class="nav-mobile__item" ui-sref="about">О нас</a>
+  <a class="nav-mobile__item" ui-sref="contact">Связаться</a>
+  <a class="nav-mobile__item" ng-if="userRole === 0 || userRole === 1" ng-click="signOut()">Выйти</a>
+</nav>
+<script type="text/ng-template" id="loginTemplate">
+  <div ng-controller="LoginFormCtrl" class="login-window">
+    <div class="login-window__form">
+      <div class="form__close-button" ng-click="closeThisDialog('.form__close-button')"></div>
+      <div ng-switch="timeOfDay">
+        <div class="form__greeting" ng-switch-when="morning">Доброе утро!</div>
+        <div class="form__greeting" ng-switch-when="afternoon">Добрый день!</div>
+        <div class="form__greeting" ng-switch-when="evening">Добрый вечер!</div>
+        <div class="form__greeting" ng-switch-default="night">Доброй ночи!</div>
+      </div>
+      <form name="loginForm" class="form__container" ng-switch="status">
+        <div ng-switch-when="loginForm">
+          <input type="email" placeholder="E-mail" ng-model="userLogin.Email"
+                 pattern="^([a-z0-9_-]+\.)*[a-z0-9_-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$" ng-maxlength="30"
+                 required/>
+          <input type="password" placeholder="Пароль" ng-model="userLogin.Password"
+                 pattern="^(?=^.{8,30}$)[a-zA-Z0-9]+$"
+                 ng-minlength="8" ng-maxlength="30" required/>
+          <button ng-disabled="loginForm.$invalid" ng-click="signIn()">Войти</button>
+          <p ng-if="isNoDeveloper" style="margin: 10px; color: #2980b9;">
+            Не удалось войти, проверьте введенные данные.
+          </p>
+          <div class="form__question">Не являетесь разработчиком?
+            <a class="form__become-dev" ui-sref="signup">Стать разработчиком</a>
+          </div>
+          <div class="form__question">Забыли пароль?
+            <span class="form__become-dev form__link"  ng-click="toggleStatus()">Восстановить пароль</span>
+          </div>
+        </div>
+
+        <div ng-switch-when="passwordRecovery">
+          <input type="email" placeholder="Введите ваш e-mail" ng-model="userLogin.emailForRecovery" ng-change="cons()"
+                 pattern="^([a-z0-9_-]+\.)*[a-z0-9_-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$" ng-maxlength="30"
+                 required/>
+          <button ng-disabled="loginForm.$invalid" ng-click="recoverPassword()">Отправить</button>
+          <p ng-if="isSuccess" style="margin: 10px; color: #2980b9;">
+            Ссылка на восстановление пароля отправлена вам на почту.
+          </p>
+          <div class="form__question">Не являетесь разработчиком?
+            <a class="form__become-dev" ui-sref="signup">Стать разработчиком</a>
+          </div>
+          <div class="form__question">Вспомнили пароль?
+            <span class="form__become-dev form__link" ng-click="toggleStatus()" >Войти в свой профиль</span>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</script>
