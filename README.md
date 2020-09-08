@@ -1,2 +1,6 @@
-# LeagueOfDevelopersFrontend
-Copy of League of Developers site.
+# Frontend сайта Лиги разработчиков НИТУ "МИСиС" 
+Верстка производилась по оригинальным макетам с нуля.
+## Технологии
+* AngularJS
+* HTML5
+* CSS3
